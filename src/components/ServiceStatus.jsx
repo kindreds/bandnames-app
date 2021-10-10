@@ -1,9 +1,9 @@
 import { Badge, Flex, Text } from '@chakra-ui/layout'
 
-import useSocket from '../hooks/useSocket'
+import useSocketContext from '../hooks/useSocketContext'
 
 const ServiceStatus = () => {
-  const { online } = useSocket()
+  const { online } = useSocketContext()
 
   return (
     <Flex position="fixed" top={0} left={4} alignItems="center" mt={2}>

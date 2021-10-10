@@ -1,48 +1,19 @@
-import { io } from 'socket.io-client'
-import { createContext, useEffect, useReducer, useState } from 'react'
-
-import SocketActions from './SocketActions'
-import SocketReducer from './SocketReducer'
+import { createContext } from 'react'
+import useSocket from '../hooks/useSocket'
 
 export const SocketContext = createContext()
 
-const connectSocketServer = () => {
-  return io('https://bandname-server.herokuapp.com/', { transports: ['websocket'] })
-}
-
-export const initialState = {
-  bands: [],
-  online: false
+const API = {
+  DEV: 'http://localhost:8080',
+  // Offline for maintenance
+  PROD: 'https://bandname-server.herokuapp.com/'
 }
 
 const SocketState = ({ children }) => {
-  const [socket] = useState(connectSocketServer())
-  const [state, dispatch] = useReducer(SocketReducer, initialState)
-
-  const actions = SocketActions({ state, socket }, dispatch)
-
-  useEffect(() => {
-    socket.on('connect', () => {
-      actions.setStatus(true)
-    })
-  }, [socket])
-
-  useEffect(() => {
-    socket.on('disconnect', () => {
-      actions.setStatus(false)
-    })
-  }, [socket])
-
-  useEffect(() => {
-    socket.on('BANDS-FROM-SERVER', (data) => {
-      actions.loadBands(data.bands)
-    })
-  }, [socket])
-
-  const props = { ...state, ...actions }
+  const { online, socket } = useSocket(API.PROD)
 
   return (
-    <SocketContext.Provider value={{ ...props, socket }}>
+    <SocketContext.Provider value={{ online, socket }}>
       {children}
     </SocketContext.Provider>
   )

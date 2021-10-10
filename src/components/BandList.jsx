@@ -1,15 +1,22 @@
+import { useEffect, useState } from 'react'
+import { useDisclosure } from '@chakra-ui/hooks'
 import { Tr, Th, Table, Thead, Tbody } from '@chakra-ui/table'
 
 import BandItem from './BandItem'
 import EditBand from './EditBand'
-import useSocket from '../hooks/useSocket'
-import { useDisclosure } from '@chakra-ui/hooks'
-import { useState } from 'react'
+import useSocketContext from '../hooks/useSocketContext'
 
 const BandList = () => {
+  const { socket } = useSocketContext()
+  const [bands, setBands] = useState([])
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { bands, editBand, deleteBand } = useSocket()
   const [band, setBand] = useState({ id: 0, name: '', votes: 0 })
+
+  useEffect(() => {
+    socket.on('BANDS-FROM-SERVER', (data) => {
+      setBands(data.bands)
+    })
+  }, [])
 
   const handleEdit = (band) => {
     onOpen()
@@ -17,15 +24,17 @@ const BandList = () => {
   }
 
   const handlePlusVotes = (band) => {
-    editBand({ ...band, votes: band.votes + 1 })
+    const payload = { ...band, votes: band.votes + 1 }
+    socket.emit('EDIT-BAND', payload)
   }
 
   const handleDelete = (band) => {
-    deleteBand(band.id)
+    socket.emit('DELETE-BAND', band.id)
   }
 
   const handleSubmitModal = (name) => {
-    editBand({ ...band, name })
+    const payload = { ...band, name }
+    socket.emit('EDIT-BAND', payload)
     onClose()
     setBand({ id: 0, name: '', votes: 0 })
   }

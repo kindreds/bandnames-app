@@ -1,18 +1,19 @@
 import { Button } from '@chakra-ui/button'
+import { useDisclosure } from '@chakra-ui/hooks'
 import { Flex, Heading, Divider, Container } from '@chakra-ui/layout'
 
 import AddBand from './components/AddBand'
 import BandList from './components/BandList'
 import ServiceStatus from './components/ServiceStatus'
-import { useDisclosure } from '@chakra-ui/hooks'
-import useSocket from './hooks/useSocket'
+
+import useSocketContext from './hooks/useSocketContext'
 
 const App = () => {
-  const { addBand } = useSocket()
+  const { socket } = useSocketContext()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const handleCreate = (name) => {
-    addBand(name)
+    socket.emit('ADD-BAND', { name })
     onClose()
   }
 
